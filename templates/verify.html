@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Account - Firebase</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="form-container">
+        <h2>Verify Your Mobile Number</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <p>A verification code will be sent to **{{ mobile_number }}**.</p>
+        <p>Click "Send OTP" to receive the code. You might see a reCAPTCHA challenge.</p>
+
+        <!-- Container for reCAPTCHA (Firebase handles rendering here) -->
+        <div id="recaptcha-container"></div>
+
+        <form onsubmit="return false;"> <!-- Prevent default form submission -->
+            <button type="button" onclick="sendOtp()" id="sendOtpButton">Send OTP</button>
+            
+            <input type="text" id="verification_code" placeholder="Enter the 6-digit code" required style="display: none;">
+            <button type="button" onclick="verifyOtp()" id="verifyOtpButton" style="display: none;">Verify Code</button>
+        </form>
+        
+        <p>Having trouble? <a href="{{ url_for('logout') }}">Logout and try again</a></p>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script>
+        // Your web app's Firebase configuration (GET THIS FROM YOUR FIREBASE CONSOLE - Project settings > Your apps > Web app)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYi_EwHYI2xQT02glDGVidXDL7nXTye0U", // <--- REPLACE WITH YOUR ACTUAL API KEY
+            authDomain: "sms-sending-8bafe.firebaseapp.com", // <--- REPLACE WITH YOUR ACTUAL AUTH DOMAIN
+            projectId: "sms-sending-8bafe", // <--- REPLACE WITH YOUR ACTUAL PROJECT ID
+            storageBucket: "sms-sending-8bafe.firebasestorage.app",
+            messagingSenderId: "471123809818",
+            appId: "1:471123809818:web:f490aee286bb47a82ae3a3",
+            measurementId: "G-PZZG3WTVGR" // Optional, if you use Analytics
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        let confirmationResult; // To store the result of signInWithPhoneNumber
+
+        // Initialize reCAPTCHA verifier
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+            'size': 'invisible', // 'normal' for visible reCAPTCHA
+            'callback': (response) => {
+                // reCAPTCHA solved, this callback is fired automatically
+                // You can proceed with signInWithPhoneNumber here or ensure it's triggered
+            },
+            'expired-callback': () => {
+                alert('reCAPTCHA expired. Please try sending OTP again.');
+                // Re-render reCAPTCHA if necessary
+                window.recaptchaVerifier.render().then(function(widgetId) {
+                    grecaptcha.reset(widgetId);
+                });
+            }
+        });
+
+        // Function to send the OTP
+        function sendOtp() {
+            const phoneNumber = "{{ mobile_number }}"; // Get mobile number from Flask context
+            const appVerifier = window.recaptchaVerifier;
+
+            document.getElementById('sendOtpButton').disabled = true;
+            document.getElementById('sendOtpButton').textContent = 'Sending...';
+
+            auth.signInWithPhoneNumber(phoneNumber, appVerifier)
+                .then((result) => {
+                    confirmationResult = result;
+                    alert('OTP has been sent to ' + phoneNumber + '.');
+                    document.getElementById('sendOtpButton').style.display = 'none';
+                    document.getElementById('verification_code').style.display = 'block';
+                    document.getElementById('verifyOtpButton').style.display = 'block';
+                })
+                .catch((error) => {
+                    console.error("Error sending OTP:", error);
+                    alert('Error sending OTP: ' + error.message);
+                    document.getElementById('sendOtpButton').disabled = false;
+                    document.getElementById('sendOtpButton').textContent = 'Send OTP';
+                    // Re-render reCAPTCHA if it was invisible
+                    window.recaptchaVerifier.render().then(function(widgetId) {
+                        grecaptcha.reset(widgetId);
+                    });
+                });
+        }
+
+        // Function to verify the OTP
+        function verifyOtp() {
+            const code = document.getElementById('verification_code').value;
+            if (!confirmationResult) {
+                alert('No OTP request pending. Please click "Send OTP" first.');
+                return;
+            }
+
+            document.getElementById('verifyOtpButton').disabled = true;
+            document.getElementById('verifyOtpButton').textContent = 'Verifying...';
+
+            confirmationResult.confirm(code).then((result) => {
+                // User successfully verified by Firebase
+                const user = result.user;
+                console.log("Firebase user verified:", user);
+
+                // Get Firebase ID token and send to Flask backend for secure login
+                user.getIdToken().then((idToken) => {
+                    fetch('/api/verify-firebase-token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            idToken: idToken,
+                            username: "{{ session.get('pending_firebase_verification_user') }}" // Pass username from session
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Account successfully verified and logged in!');
+                            window.location.href = '/dashboard';
+                        } else {
+                            alert('Backend verification failed: ' + data.message);
+                            document.getElementById('verifyOtpButton').disabled = false;
+                            document.getElementById('verifyOtpButton').textContent = 'Verify Code';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error sending token to backend:', error);
+                        alert('An error occurred during backend login.');
+                        document.getElementById('verifyOtpButton').disabled = false;
+                        document.getElementById('verifyOtpButton').textContent = 'Verify Code';
+                    });
+                });
+
+            }).catch((error) => {
+                console.error("Error verifying OTP:", error);
+                alert('Invalid verification code. Please try again or resend OTP: ' + error.message);
+                document.getElementById('verifyOtpButton').disabled = false;
+                document.getElementById('verifyOtpButton').textContent = 'Verify Code';
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+{
+    "Sakha": "4566",
+    "devshankar": "4568",
+    "shakila": "scrypt:32768:8:1$bGACmgaZmM8Mm1Xa$0330719efdd8f1f121b74dd7861c1cfc1643f9f46fc8bd7841ad76581e6f9d81cacbe89023d5cc74e713af837e131ef42d89913c4c2458dbabfdb3f43345be1b",
+    "Iiliyas": {
+        "password": "scrypt:32768:8:1$hTYmGtm3aOtMvKtI$bdb258d067f6de18417babf06fb9653fb27add0db8c5d77d2cfe6fa3a9c32174216961b733b78086963c8550a32c6ac3441a602e4e89da244df0c76f04370688",
+        "email": "sakhabhiram1234@gmail.com",
+        "is_verified": false
+    },
+    "Sakha Abhiram": {
+        "password": "scrypt:32768:8:1$KYnGi9aJIXExt16y$145d1da0540eda6bb22d425b90251c31a80821795f2705ff20ff4b063c299f9c6f8112cbc5f01dc9595f490191fa0885bb0c41bc7e060f4ad0c57f4341bbc2e4",
+        "email": "sakhabhiram1234@gmail.com",
+        "is_verified": false
+    },
+    "veeranna": {
+        "password": "scrypt:32768:8:1$UhIkpojRmcSPD0Lb$d44c40865e4f7a74c6a518016a95fb2ceff8ad2d9949f2616840d769bd255e3a465fd50b3f375cc245d534c59c2266209115fe3d4d7dfde415e9c530bf44f291",
+        "email": "aabhiramsakha@gmail.com",
+        "is_verified": false
+    },
+    "sheik iliyas": {
+        "password": "scrypt:32768:8:1$vw7cv6kIIPvkdBqe$f1f635f31c3887d75a0499e4609548228a367e7eba35653a98709403f81ad19feb9ca28bb88a8f6c5e6d674b45467fdc60dfc249af3330533358383f92ce025c",
+        "email": "sheikilyas71@gmail.com",
+        "is_verified": false
+    },
+    "Lakshman": {
+        "password": "scrypt:32768:8:1$s61O6QLr6AcWnOvJ$be2cf59a462fe42b97ea65f897d57407c5f5d2aa83b9bc3a5fad07041c3474e70a4f797cf6af910835900396e0dc9d47e36265c4c9b0f28aed0a4318b4b67f79",
+        "mobile_number": "9182214852",
+        "is_verified": false
+    },
+    "Sakha Abh": {
+        "password": "scrypt:32768:8:1$k2HwLS5prrAOKDHw$2c7e92b987f26f335e2efedd627a6105a0be8a92d1065faf0c2855a10a2684792db45fb7b4f3edd887a576eeae8d61d4b14701441b88c011547dc1833c270f5f"
+    },
+    "Abhiram": {
+        "password": "scrypt:32768:8:1$ErX8aYV74quIig0y$2de3a0f991edb5a0513c3fb17acca17dd7dd98d1f4ea9347fcf7fa7ed3dd23081f910cbb0c5a44711f9517f04c5f64b2db3318a74133a52a52cf8da897f95d73"
+    },
+    "Srikanth": {
+        "password": "scrypt:32768:8:1$N81gs7dMP3yv6IAc$25acfeda749f809316e49fdd60a8d0d0c0bf0f808c50cd583a30d22b35fd5f7eeb81497c0da17095b68e1fe0240a3ace4369e48fe91f4718dda08038685f4532"
+    }
+}
